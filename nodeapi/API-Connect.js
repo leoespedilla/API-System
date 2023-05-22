@@ -58,17 +58,21 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-app.get('/boardinghouse', verifyToken, (req, res) => {
+app.get('/bhtables', verifyToken, (req, res) => {
   const displayData = req.query.displayData; 
   let sqlQuery;
    if (displayData === "Student_Information") {
     sqlQuery = "SELECT * FROM `student_information` ";
+  
   } else if (displayData === "RoomInformation") {
     sqlQuery = "SELECT * FROM `room_information`";
+  
   } else if (displayData === "ReservationForm") {
     sqlQuery = "SELECT * FROM `reservation`";
+ 
   } else if (displayData === "MontlyPayment") {
     sqlQuery = "SELECT concat(`STUDENT_FIRST_NAME`,' ', `STUDENT_MIDDLE_NAME`,' ', `STUDENT_LAST_NAME`) as name,monthly_payment.PAYMENT,Date_Format(monthly_payment.DATE , '%d-%m-%Y') as 'Payment' FROM `student_information` INNER JOIN monthly_payment on monthly_payment.STUDENT_ID=student_information.STUDENT_ID";
+ 
   }  else {
     return res.status(400).send({ error: 'Invalid displayData value' });
   }
@@ -103,7 +107,7 @@ app.get('/search', verifyToken, (req, res) => {
   });
 });
 
-app.delete('/boardinghouse', verifyToken, (req, res) => {
+app.delete('/bhdeletion', verifyToken, (req, res) => {
   const {id,tableName}= req.query;
   let sqlQuery;
   if (!id || isNaN(id) || !tableName) {
@@ -138,119 +142,14 @@ app.put('/boardinghouse', verifyToken, (req, res) => {
     return;
   }
 
-  if(tableName==="Resident Profile"){
-    const {householdNumber,familyNumber,firstName,middleName,lastName,extensionName,birthDate,Age,birthPlace,civilStatus,sex,contactNumber,purok} = req.query;
-    if (!householdNumber || !familyNumber || !firstName || !middleName || !lastName || !birthDate || !Age || !birthPlace || !civilStatus || !civilStatus || !sex || !purok) {
+  if(tableName==="RoomInformation"){
+    const {roomnumber,occupancy} = req.query;
+    if (!roomnumber|| !occupancy ) {
       res.status(400).send({ error: "Missing parameter" });
       return;
     }
-    const query = "UPDATE `resident_profile` SET `Household_Number`= ? ,`Family_Number`= ? ,`First_Name`= ? ,`Middle_Name`= ? ,`Last_Name`= ? ,`Extension_Name`= ? ,`Birth_Date`= ? ,`Age`= ? ,`Birth_Place`= ? ,`Civil_Status`= ? ,`Sex`= ? ,`Contact_Number`= ? ,`Purok`= ? WHERE resident_id= ?";
-    db.query(query, [householdNumber, familyNumber,firstName,middleName,lastName,extensionName,birthDate,Age,birthPlace,civilStatus,sex,contactNumber,purok,id], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully updated' });
-      }
-    });
-  }
-  else if(tableName==="Beneficiaries"){
-    const {benefitId,membershipDate,status} = req.query;
-    if ( !benefitId || isNaN(benefitId) || !membershipDate || !status) {
-      res.status(400).send({ error: "Missing parameter or id error" });
-      return;
-    }
-    const query = "UPDATE `beneficiary` SET `Benefit_ID`=?,`Membership_Date`=?,`Status`= ? WHERE Beneficiary_ID= ?";
-    db.query(query, [benefitId,membershipDate,status,id], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully updated' });
-      }
-    });
-  }
-  else if(tableName==="Benefits"){
-    const {benefitName,description,dateImplemented} = req.query;
-    if (!benefitName || !description || !dateImplemented) {
-      res.status(400).send({ error: "Missing parameter or id error" });
-      return;
-    }
-    const query = "UPDATE `benefits` SET `Benefit_Name`= ?,`Description`= ?,`Date_Implemented`= ? WHERE Benefit_ID= ?";
-    db.query(query, [benefitName,description,dateImplemented,id], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully updated' });
-      }
-    });
-  }
-  else if(tableName==="Blood Pressure"){
-    const {systolic,diastolic,level,dateChecked} = req.query;
-    if (!systolic || isNaN(systolic) || !diastolic || isNaN(diastolic) || !level || !dateChecked) {
-      res.status(400).send({ error: "Missing parameter or id error" });
-      return;
-    }
-    const query = "UPDATE `blood_pressure` SET `systolic`= ?,`diastolic`= ?,`Level`= ?,`Date_Checked`= ? WHERE BP_ID= ?";
-    db.query(query, [systolic,diastolic,level,dateChecked,id], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully updated' });
-      }
-    });
-  }
-  else if(tableName==="BMI"){
-    const {weight,height,status,dateUpdated} = req.query;
-    if (!weight || isNaN(weight) || !height || isNaN(height) || !status || !dateUpdated ) {
-      res.status(400).send({ error: "Missing parameter or error" });
-      return;
-    }
-    const query = "UPDATE `bmi_information` SET `Weight`=?,`Height`=?,`Status`=?,`date_updated`=? where Resident_ID=?";
-    db.query(query, [weight,height,status,dateUpdated,id], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully updated' });
-      }
-    });
-  }
-  else if(tableName==="Pregnancy"){
-    const {monthsOfPregnancy,dateChecked} = req.query;
-    if (!monthsOfPregnancy || isNaN(monthsOfPregnancy) || !dateChecked) {
-      res.status(400).send({ error: "Missing parameter or id error" });
-      return;
-    }
-    const query = "UPDATE `pregnancy_information` SET `Months_of_Pregnancy`= ?,`Date_Checked`= ? WHERE Pregnancy_ID=?";
-    db.query(query, [monthsOfPregnancy,dateChecked,id], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully updated' });
-      }
-    });
-  }
-  else if(tableName==="Vaccine"){
-    const {vaccineName,vaccineDetail,dossageSequence,dateImplemented} = req.query;
-    if (!vaccineName || isNaN(dossageSequence) || !vaccineDetail || !dateImplemented) {
-      res.status(400).send({ error: "Missing parameter or id error" });
-      return;
-    }
-    const query = "UPDATE `vaccine` SET `Vaccine_Name`=?,`Vaccine_Detail`=?,`Dossage_Sequence`=?,`Date_Implemented`=? WHERE Vaccine_ID=?";
-    db.query(query, [vaccineName,vaccineDetail,dossageSequence,dateImplemented,id], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully updated' });
-      }
-    });
-  }
-  else if(tableName==="Vaccination"){
-    const {vaccinationDate,vaccineId,vaccinationCount,status} = req.query;
-    if (!vaccinationDate || isNaN(vaccineId) || !vaccineId || !vaccinationCount || isNaN(vaccinationCount) || !status) {
-      res.status(400).send({ error: "Missing parameter or id error" });
-      return;
-    }
-    const query = "UPDATE `vaccination` SET `Vaccination_Date`=?,`Vaccine_ID`=?,`Vaccination_Count`=?,`Status`=? WHERE Vaccination_ID =?";
-    db.query(query, [vaccinationDate,vaccineId,vaccinationCount,status,id], (err, result) => {
+    const query ="UPDATE `room_information` SET `ROOM_NUMBER`= ?,`OCCUPANCY`=? WHERE ROOM_ID= ?";
+    db.query(query, [roomnumber, occupancy,id], (err, result) => {
       if (err) {
         res.status(500).send({ error: 'Error' });
       } else {
@@ -263,18 +162,18 @@ app.put('/boardinghouse', verifyToken, (req, res) => {
   }
 });
 
-app.post('/bhwserver', verifyToken, (req, res) => {
+app.post('/boardinghouse', verifyToken, (req, res) => {
   const tableName=req.query.tableName;
   console.log(tableName);
-  if(tableName==="Resident Profile"){
-    const {residentId,householdNumber,familyNumber,firstName,middleName,lastName,extensionName,birthDate,Age,birthPlace,civilStatus,sex,contactNumber,purok} = req.query;
+  if(tableName==="Student_Information"){
+    const {studentFirstName,studentMiddleName,studentLastName,birthdate,age,gender,address,contactNumber,emailAddress,parentName,parentAddress,parentContactNumber,roomID} = req.query;
     console.log(req.query);
-    if (!householdNumber || !familyNumber || !firstName || !middleName || !lastName || !birthDate || !Age || !birthPlace || !civilStatus || !civilStatus || !sex || !purok) {
+    if (!studentFirstName || !studentMiddleName || !studentLastName || !birthdate || !age || !gender || !address || !contactNumber || !emailAddress || !parentName || !parentAddress || !parentContactNumber || !roomID) {
       res.status(400).send({ error: "Missing parameter" });
       return;
     }
-    const query = "INSERT INTO `resident_profile`VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    db.query(query, [residentId,householdNumber, familyNumber,firstName,middleName,lastName,extensionName,birthDate,Age,birthPlace,civilStatus,sex,contactNumber,purok], (err, result) => {
+    const query = "INSERT INTO `student_information`( `STUDENT_FIRST_NAME`, `STUDENT_MIDDLE_NAME`, `STUDENT_LAST_NAME`, `BIRTHDATE`, `AGE`, `GENDER`, `ADDRESS`, `CONTACT_NUMBER`, `EMAIL_ADDRESS`, `PARENT_NAME`, `PARENT_ADDRESS`, `PARENT_CONTACT_NUMBER`, `ROOM_ID=?";
+    db.query(query, [studentId,studentFirstName, studentMiddleName,studentLastName,birthdate,age,gender,address,contactNumber,emailAddress,parentName,parentAddress,parentContactNumber,roomID], (err, result) => {
       if (err) {
         res.status(500).send({ error: 'Error' });
       } else {
@@ -282,14 +181,15 @@ app.post('/bhwserver', verifyToken, (req, res) => {
       }
     });
   }
-  else if(tableName==="Account Information"){
-    const {accountId} = req.query;
-    if (!accountId || isNaN(accountId)) {
-      res.status(400).send({ error: "Missing parameter or id error" });
+  else if(tableName==="RoomInformation"){
+    const {roomNumber,occupancy} = req.query;
+    console.log(req.query);
+    if (!roomNumber || !occupancy) {
+      res.status(400).send({ error: "Missing parameter" });
       return;
     }
-    const query = "INSERT into account_information(`Name`, `Username`, `Password`, `Date_Created`, `Role_ID`) SELECT `Name`, `Username`, `Password`, `Date_Created`, `Role_ID`  FROM account_request WHERE Request_ID=?";
-    db.query(query, [accountId], (err, result) => {
+    const query = "INSERT INTO `room_information`( `ROOM_NUMBER`, `OCCUPANCY'=?";
+    db.query(query, [roomNumber,occupancy], (err, result) => {
       if (err) {
         res.status(500).send({ error: 'Error' });
       } else {
