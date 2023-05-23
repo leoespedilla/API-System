@@ -197,130 +197,131 @@ app.post('/boardinghouse', verifyToken, (req, res) => {
       }
     });
   }
-  else if(tableName==="Account Request"){
-    const {name,username,password,dateCreated,roleId} = req.query;
-    if (!name || !username || !password || !dateCreated || !roleId || isNaN(roleId)) {
-      res.status(400).send({ error: "Missing parameter or role id error" });
-      return;
-    }
-    const query = "INSERT INTO `account_request`(`Name`, `Username`, `Password`, `Date_Created`, `Role_ID`) VALUES (?,?,?,?,?)";
-    db.query(query, [name,username,password,dateCreated,roleId], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully inserted' });
-      }
-    });
-  }
-  else if(tableName==="Beneficiaries"){
-    const {residentId,benefitId,membershipDate,status} = req.query;
-    if (!residentId || isNaN(residentId) || !benefitId || isNaN(benefitId) || !membershipDate || !status) {
-      res.status(400).send({ error: "Missing parameter or id error" });
-      return;
-    }
-    const query = "INSERT INTO `beneficiary`(`Resident_ID`, `Benefit_ID`, `Membership_Date`, `Status`) VALUES (?,?,?,?)";
-    db.query(query, [residentId,benefitId,membershipDate,status], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully inserted' });
-      }
-    });
-  }
-  else if(tableName==="Benefits"){
-    const {benefitName,description,dateImplemented} = req.query;
-    if (!benefitName || !description || !dateImplemented) {
-      res.status(400).send({ error: "Missing parameter or id error" });
-      return;
-    }
-    const query = "INSERT INTO `benefits`(`Benefit_Name`,`Description`, `Date_Implemented`) VALUES (?,?,?)";
-    db.query(query, [benefitName,description,dateImplemented], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully inserted' });
-      }
-    });
-  }
-  else if(tableName==="Blood Pressure"){
-    const {residentId} = req.query;
-    if (!residentId || isNaN(residentId)) {
-      res.status(400).send({ error: "Missing parameter or id error" });
-      return;
-    }
-    const query = "INSERT INTO `blood_pressure`(`Resident_ID`) VALUES (?)";
-    db.query(query, [residentId], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully inserted' });
-      }
-    });
-  }
-  else if(tableName==="BMI"){
-    const {residentId} = req.query;
-    if (!residentId || isNaN(residentId)) {
-      res.status(400).send({ error: "Missing parameter or id error" });
-      return;
-    }
-    const query = "INSERT INTO `bmi_information`(`Resident_ID`) VALUES(?)";
-    db.query(query, [residentId], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully inserted' });
-      }
-    });
-  }
-  else if(tableName==="Pregnancy"){
-    const {residentId,monthsOfPregnancy,dateChecked} = req.query;
-    if (!residentId || isNaN(residentId) || !monthsOfPregnancy || isNaN(monthsOfPregnancy) || !dateChecked) {
-      res.status(400).send({ error: "Missing parameter or id error" });
-      return;
-    }
-    const query = "INSERT INTO `pregnancy_information`(`Resident_ID`, `Months_of_Pregnancy`, `Date_Checked`) VALUES (?,?,?)";
-    db.query(query, [residentId,monthsOfPregnancy,dateChecked], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully inserted' });
-      }
-    });
-  }
-  else if(tableName==="Vaccine"){
-    const {vaccineName,vaccineDetail,dossageSequence,dateImplemented} = req.query;
-    if (!vaccineName || isNaN(dossageSequence) || !vaccineDetail || !dateImplemented) {
-      res.status(400).send({ error: "Missing parameter or id error" });
-      return;
-    }
-    const query = "INSERT INTO `vaccine`( `Vaccine_Name`, `Vaccine_Detail`, `Dossage_Sequence`, `Date_Implemented`) VALUES (?,?,?,?)";
-    db.query(query, [vaccineName,vaccineDetail,dossageSequence,dateImplemented], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully inserted' });
-      }
-    });
-  }
-  else if(tableName==="Vaccination"){
-    const {residentId,vaccinationDate,vaccineId,vaccinationCount,status} = req.query;
-    if (!residentId || isNaN(residentId) || !vaccinationDate || isNaN(vaccineId) || !vaccineId || !vaccinationCount || isNaN(vaccinationCount) || !status) {
-      res.status(400).send({ error: "Missing parameter or id error" });
-      return;
-    }
-    const query = "INSERT INTO `vaccination`( `Resident_ID`, `Vaccination_Date`, `Vaccine_ID`, `Vaccination_Count`, `Status`) VALUES (?,?,?,?,?)";
-    db.query(query, [residentId,vaccinationDate,vaccineId,vaccinationCount,status], (err, result) => {
-      if (err) {
-        res.status(500).send({ error: 'Error' });
-      } else {
-        res.status(200).send({ message: 'Successfully inserted' });
-      }
-    });
-  }
-  else{
-    return res.status(400).send({ error: 'Invalid table name' });
-  }
-});
+  
+  //else if(tableName==="Account Request"){
+  //  const {name,username,password,dateCreated,roleId} = req.query;
+  //  if (!name || !username || !password || !dateCreated || !roleId || isNaN(roleId)) {
+  //    res.status(400).send({ error: "Missing parameter or role id error" });
+  //    return;
+  //  }
+  //  const query = "INSERT INTO `account_request`(`Name`, `Username`, `Password`, `Date_Created`, `Role_ID`) VALUES (?,?,?,?,?)";
+  //  db.query(query, [name,username,password,dateCreated,roleId], (err, result) => {
+  //    if (err) {
+  //    res.status(500).send({ error: 'Error' });
+  //  } else {
+  //    res.status(200).send({ message: 'Successfully inserted' });
+  //  }
+  //});
+  //}
+  //else if(tableName==="Beneficiaries"){
+  //  const {residentId,benefitId,membershipDate,status} = req.query;
+  //  if (!residentId || isNaN(residentId) || !benefitId || isNaN(benefitId) || !membershipDate || !status) {
+  //  res.status(400).send({ error: "Missing parameter or id error" });
+  //  return;
+  //  }
+   // const query = "INSERT INTO `beneficiary`(`Resident_ID`, `Benefit_ID`, `Membership_Date`, `Status`) VALUES (?,?,?,?)";
+  //  db.query(query, [residentId,benefitId,membershipDate,status], (err, result) => {
+  //  if (err) {
+  //    res.status(500).send({ error: 'Error' });
+  //  } else {
+  //    res.status(200).send({ message: 'Successfully inserted' });
+  //  }
+  //});
+  //}
+  //else if(tableName==="Benefits"){
+  // const {benefitName,description,dateImplemented} = req.query;
+  // if (!benefitName || !description || !dateImplemented) {
+  //  res.status(400).send({ error: "Missing parameter or id error" });
+  //  return;
+  //}
+  //const query = "INSERT INTO `benefits`(`Benefit_Name`,`Description`, `Date_Implemented`) VALUES (?,?,?)";
+  //db.query(query, [benefitName,description,dateImplemented], (err, result) => {
+  //  if (err) {
+  //    res.status(500).send({ error: 'Error' });
+  //  } else {
+  //    res.status(200).send({ message: 'Successfully inserted' });
+  //  }
+  //});
+  //}
+  //else if(tableName==="Blood Pressure"){
+  //const {residentId} = req.query;
+  //if (!residentId || isNaN(residentId)) {
+  //  res.status(400).send({ error: "Missing parameter or id error" });
+  //  return;
+  //}
+  //const query = "INSERT INTO `blood_pressure`(`Resident_ID`) VALUES (?)";
+  //db.query(query, [residentId], (err, result) => {
+  //  if (err) {
+  //    res.status(500).send({ error: 'Error' });
+  //  } else {
+  //    res.status(200).send({ message: 'Successfully inserted' });
+  //  }
+  //});
+  //}
+  //else if(tableName==="BMI"){
+  //const {residentId} = req.query;
+  //if (!residentId || isNaN(residentId)) {
+  //  res.status(400).send({ error: "Missing parameter or id error" });
+  //  return;
+  //}
+  //const query = "INSERT INTO `bmi_information`(`Resident_ID`) VALUES(?)";
+  //db.query(query, [residentId], (err, result) => {
+  //  if (err) {
+  //    res.status(500).send({ error: 'Error' });
+  //  } else {
+  //    res.status(200).send({ message: 'Successfully inserted' });
+  //  }
+  //});
+  //}
+  //else if(tableName==="Pregnancy"){
+  //const {residentId,monthsOfPregnancy,dateChecked} = req.query;
+  //if (!residentId || isNaN(residentId) || !monthsOfPregnancy || isNaN(monthsOfPregnancy) || !dateChecked) {
+  //  res.status(400).send({ error: "Missing parameter or id error" });
+  //  return;
+  //}
+  //const query = "INSERT INTO `pregnancy_information`(`Resident_ID`, `Months_of_Pregnancy`, `Date_Checked`) VALUES (?,?,?)";
+  //db.query(query, [residentId,monthsOfPregnancy,dateChecked], (err, result) => {
+  //  if (err) {
+  //    res.status(500).send({ error: 'Error' });
+  //  } else {
+  //    res.status(200).send({ message: 'Successfully inserted' });
+  //  }
+  //});
+  //}
+  //else if(tableName==="Vaccine"){
+  //const {vaccineName,vaccineDetail,dossageSequence,dateImplemented} = req.query;
+  //if (!vaccineName || isNaN(dossageSequence) || !vaccineDetail || !dateImplemented) {
+  //  res.status(400).send({ error: "Missing parameter or id error" });
+  //  return;
+  //}
+  //const query = "INSERT INTO `vaccine`( `Vaccine_Name`, `Vaccine_Detail`, `Dossage_Sequence`, `Date_Implemented`) VALUES (?,?,?,?)";
+  //db.query(query, [vaccineName,vaccineDetail,dossageSequence,dateImplemented], (err, result) => {
+  //  if (err) {
+  //    res.status(500).send({ error: 'Error' });
+  //  } else {
+  //    res.status(200).send({ message: 'Successfully inserted' });
+  //  }
+  //});
+  //}
+  //else if(tableName==="Vaccination"){
+  //const {residentId,vaccinationDate,vaccineId,vaccinationCount,status} = req.query;
+  //if (!residentId || isNaN(residentId) || !vaccinationDate || isNaN(vaccineId) || !vaccineId || !vaccinationCount || isNaN(vaccinationCount) || !status) {
+  //  res.status(400).send({ error: "Missing parameter or id error" });
+  //  return;
+  //}
+  //const query = "INSERT INTO `vaccination`( `Resident_ID`, `Vaccination_Date`, `Vaccine_ID`, `Vaccination_Count`, `Status`) VALUES (?,?,?,?,?)";
+  //db.query(query, [residentId,vaccinationDate,vaccineId,vaccinationCount,status], (err, result) => {
+  //  if (err) {
+  //    res.status(500).send({ error: 'Error' });
+  //  } else {
+  //    res.status(200).send({ message: 'Successfully inserted' });
+  //  }
+  //});
+  //}
+  //else{
+  //return res.status(400).send({ error: 'Invalid table name' });
+  //}
+//});
 
 app.listen(3000, () => {
   console.log('Server running on port 3000');
