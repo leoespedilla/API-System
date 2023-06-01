@@ -19,36 +19,38 @@ namespace Leo_Espedilla_BSIT_2A
 
         private void RoomInformation_Load(object sender, EventArgs e)
         {
-            InfoDB.dgvViewing("SELECT * FROM `room_information`", dgvRoomInfo);
+            ConnectAPI.dgvViewing("RoomInformation", dgvRoomInfo);
         }
 
         private void btnBack_Click(object sender, EventArgs e)
         {
-            MainForm mainForm = new MainForm();
-            mainForm.Show();
+            StudentInfoForm studentInfoForm = new StudentInfoForm();
+            studentInfoForm.Show();
             this.Hide();
-
-
 
 
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            InfoDB.SaveUpdateDeleteData("INSERT INTO `room_information`( `ROOM_NUMBER`, `OCCUPANCY`) VALUES ('" + tbxRoomNumber.Text + "','" + tbxOccupancy.Text + "')");
-            InfoDB.dgvViewing("SELECT * FROM `room_information`", dgvRoomInfo);
+            string[] column = { "roomNumber","occupancy" };
+            string[] data = { tbxRoomNumber.Text , tbxOccupancy.Text };
+            ConnectAPI.saveData("RoomInformation",column,data);
+            ConnectAPI.dgvViewing("RoomInformation", dgvRoomInfo);
         }
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            InfoDB.SaveUpdateDeleteData("UPDATE `room_information` SET `ROOM_NUMBER`='[value-2]',`OCCUPANCY`='[value-3]' WHERE ROOM_ID=" + lblRoomId.Text);
-            InfoDB.dgvViewing("SELECT * FROM `room_information`", dgvRoomInfo);
+            string[] column = { "roomNumber", "occupancy" };
+            string[] data = { tbxRoomNumber.Text, tbxOccupancy.Text };
+            ConnectAPI.updateData(column,data,lblRoomId.Text);
+            ConnectAPI.dgvViewing("RoomInformation", dgvRoomInfo);
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            InfoDB.SaveUpdateDeleteData("DELETE FROM `room_information` WHERE ROOM_ID=" + lblRoomId.Text);
-            InfoDB.dgvViewing("SELECT * FROM `room_information`", dgvRoomInfo);
+            ConnectAPI.deleteData("RoomInformation",lblRoomId.Text);
+            ConnectAPI.dgvViewing("RoomInformation", dgvRoomInfo);
         }
 
         private void dgvRoomInfo_CellClick(object sender, DataGridViewCellEventArgs e)

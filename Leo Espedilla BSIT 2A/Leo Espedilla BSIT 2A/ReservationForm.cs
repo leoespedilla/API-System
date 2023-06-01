@@ -22,21 +22,22 @@ namespace Leo_Espedilla_BSIT_2A
         {
             lblID.Hide();
             label7.Hide();
-            InfoDB.dgvViewing("SELECT * FROM `reservation`", dgvReservation);
+            ConnectAPI.dgvViewing("ReservationForm", dgvReservation);
         }
 
         private void btnBack_Click(object sender, EventArgs e)
         {
-            MainForm mainForm = new MainForm();
-            mainForm.Show();
+            StudentInfoForm studentInfoForm = new StudentInfoForm();
+            studentInfoForm.Show();
             this.Hide();
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            InfoDB.SaveUpdateDeleteData("INSERT INTO `reservation`( `STUDENT_NAME`, `RESERVATION_DATE`, `ADVANCE_PAYMENT`) VALUES ('" + tbxStudentFullName.Text + "','" + dtpReservationDate.Value.ToString("yyyy-dd-MM") + "','" + tbxAdvancePayment.Text + "')");
-            InfoDB.dgvViewing("SELECT * FROM `reservation` ", dgvReservation);
-
+            string[] column = { "STUDENT_NAME", "RESERVATION_DATE", "ADVANCE_PAYMENT" };
+            string[] data = { tbxStudentFullName.Text, dtpReservationDate.Value.ToString("yyyy-dd-MM"), tbxAdvancePayment.Text };
+            ConnectAPI.saveData("reservation", column, data);
+            ConnectAPI.dgvViewing("ReservationForm", dgvReservation);
         }
 
         private void dgvReservation_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -62,14 +63,19 @@ namespace Leo_Espedilla_BSIT_2A
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            InfoDB.SaveUpdateDeleteData("UPDATE `reservation` SET `STUDENT_NAME`='" + tbxStudentFullName.Text + "',`RESERVATION_DATE`='" + dtpReservationDate.Value.ToString("yyyy-dd-MM") + "',`ADVANCE_PAYMENT`='" + tbxAdvancePayment.Text + "' WHERE RESERVATION_ID=" + lblID.Text);
-            InfoDB.dgvViewing("SELECT * FROM `reservation` ", dgvReservation);
+            //InfoDB.SaveUpdateDeleteData("UPDATE `reservation` SET `STUDENT_NAME`='" + tbxStudentFullName.Text + "',`RESERVATION_DATE`='" + dtpReservationDate.Value.ToString("yyyy-dd-MM") + "',`ADVANCE_PAYMENT`='" + tbxAdvancePayment.Text + "' WHERE RESERVATION_ID=" + lblID.Text);
+            ConnectAPI.dgvViewing("ReservationForm", dgvReservation);
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            InfoDB.SaveUpdateDeleteData("DELETE FROM `reservation` WHERE RESERVATION_ID=" + lblID.Text);
-            InfoDB.dgvViewing("SELECT * FROM `reservation` ", dgvReservation);
+            ConnectAPI.deleteData("ReservationForm", lblID.Text);
+            ConnectAPI.dgvViewing("ReservationForm", dgvReservation);
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

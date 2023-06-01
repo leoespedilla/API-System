@@ -22,8 +22,8 @@ namespace Leo_Espedilla_BSIT_2A
         private void StudentInfoForm_Load(object sender, EventArgs e)
         {
             lblID.Hide();
-            InfoDB.cbxView(cbxRoom);
-            InfoDB.dgvViewing("SELECT * FROM `student_information` ", dgvStudentInfo);
+            ConnectAPI.cbxViewRoom(cbxRoom);
+            ConnectAPI.dgvViewing("Student_Information", dgvStudentInfo);
 
         }
 
@@ -38,15 +38,16 @@ namespace Leo_Espedilla_BSIT_2A
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-
-            InfoDB.SaveUpdateDeleteData("INSERT INTO `student_information`( `STUDENT_FIRST_NAME`, `STUDENT_MIDDLE_NAME`, `STUDENT_LAST_NAME`, `BIRTHDATE`, `AGE`, `GENDER`, `ADDRESS`, `CONTACT_NUMBER`, `EMAIL_ADDRESS`, `PARENT_NAME`, `PARENT_ADDRESS`, `PARENT_CONTACT_NUMBER`, `ROOM_ID`) VALUES ('" + tbxFname.Text + "','" + tbxMname.Text + "','" + tbxLname.Text + "','" + dtpBirthdate.Value.ToString("yyyy-dd-MM") + "','" + tbxAge.Text + "','" + cbxGender.Text + "','" + tbxAddress.Text + "','" + tbxContact.Text + "','" + tbxEmail.Text + "','" + tbxPName.Text + "','" + tbxPaddress.Text + "','" + tbxParentContact.Text + "','" + cbxRoom.SelectedValue + "')");
-            InfoDB.dgvViewing("SELECT * FROM `student_information` ", dgvStudentInfo);
+            string[] column = { "studentFirstName", "studentMiddleName", "studentLastName", "birthdate", "age", "gender", "address", "contactNumber", "emailAddress", "parentName", "parentAddress", "parentContactNumber", "roomID" };
+            string[] data = { tbxFname.Text, tbxMname.Text, tbxLname.Text, dtpBirthdate.Value.ToString("yyyy-dd-MM"), tbxAge.Text, cbxGender.Text, tbxAddress.Text, tbxContact.Text, tbxEmail.Text, tbxPName.Text, tbxPaddress.Text, tbxParentContact.Text,Convert.ToString (cbxRoom.SelectedValue) };
+            ConnectAPI.saveData("Student_Information", column, data);
+            ConnectAPI.dgvViewing("Student_Information", dgvStudentInfo);
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            InfoDB.SaveUpdateDeleteData("DELETE FROM `student_information` WHERE STUDENT_ID =" + lblID.Text);
-            InfoDB.dgvViewing("SELECT * FROM `student_information` ", dgvStudentInfo);
+            ConnectAPI.deleteData("Student_Information", lblID.Text);
+            ConnectAPI.dgvViewing("Student_Information", dgvStudentInfo);
 
         }
 
@@ -94,13 +95,17 @@ namespace Leo_Espedilla_BSIT_2A
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            InfoDB.SaveUpdateDeleteData("INSERT INTO `student_information`( `STUDENT_FIRST_NAME`, `STUDENT_MIDDLE_NAME`, `STUDENT_LAST_NAME`, `BIRTHDATE`, `AGE`, `GENDER`, `ADDRESS`, `CONTACT_NUMBER`, `EMAIL_ADDRESS`, `PARENT_NAME`, `PARENT_ADDRESS`, `PARENT_CONTACT_NUMBER`, `ROOM_ID`) VALUES ('" + tbxFname.Text + "','" + tbxMname.Text + "','" + tbxLname.Text + "','" + dtpBirthdate.Value.ToString("yyyy-dd-MM") + "','" + tbxAge.Text + "','" + cbxGender.Text + "','" + tbxAddress.Text + "','" + tbxContact.Text + "','" + tbxEmail.Text + "','" + tbxPName.Text + "','" + tbxPaddress.Text + "','" + tbxParentContact.Text + "','" + cbxRoom.SelectedValue + "')");
-            InfoDB.dgvViewing("SELECT * FROM `student_information` ", dgvStudentInfo);
+            //InfoDB.SaveUpdateDeleteData("INSERT INTO `student_information`( `STUDENT_FIRST_NAME`, `STUDENT_MIDDLE_NAME`, `STUDENT_LAST_NAME`, `BIRTHDATE`, `AGE`, `GENDER`, `ADDRESS`, `CONTACT_NUMBER`, `EMAIL_ADDRESS`, `PARENT_NAME`, `PARENT_ADDRESS`, `PARENT_CONTACT_NUMBER`, `ROOM_ID`) VALUES ('" + tbxFname.Text + "','" + tbxMname.Text + "','" + tbxLname.Text + "','" + dtpBirthdate.Value.ToString("yyyy-dd-MM") + "','" + tbxAge.Text + "','" + cbxGender.Text + "','" + tbxAddress.Text + "','" + tbxContact.Text + "','" + tbxEmail.Text + "','" + tbxPName.Text + "','" + tbxPaddress.Text + "','" + tbxParentContact.Text + "','" + cbxRoom.SelectedValue + "')");
+            //InfoDB.dgvViewing("SELECT * FROM `student_information` ", dgvStudentInfo);
         }
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            InfoDB.dgvViewing("SELECT * FROM `student_information` where  STUDENT_FIRST_NAME like '" + tbxSearch.Text + "%'", dgvStudentInfo);
+            ConnectAPI.searchData(tbxSearch.Text, dgvStudentInfo);
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
 
         }
     }

@@ -63,11 +63,12 @@
             // 
             // btnBack
             // 
-            btnBack.Location = new Point(1049, 659);
+            btnBack.BackgroundImage = Properties.Resources._340;
+            btnBack.BackgroundImageLayout = ImageLayout.Stretch;
+            btnBack.Location = new Point(677, 645);
             btnBack.Name = "btnBack";
             btnBack.Size = new Size(55, 30);
             btnBack.TabIndex = 7;
-            btnBack.Text = "BACK";
             btnBack.UseVisualStyleBackColor = true;
             btnBack.Click += btnBack_Click;
             // 
@@ -147,7 +148,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackgroundImage = Properties.Resources._0001;
             BackgroundImageLayout = ImageLayout.Stretch;
-            ClientSize = new Size(769, 691);
+            ClientSize = new Size(766, 702);
             Controls.Add(cbxStudent);
             Controls.Add(dtpMonthlyPayment);
             Controls.Add(tbxPayment);

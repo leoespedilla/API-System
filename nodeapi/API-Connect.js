@@ -1,8 +1,10 @@
-const express = require('express');
+const express = require ('express');
 const mysql = require('mysql');
 const multer = require('multer');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(cors());
@@ -24,39 +26,121 @@ db.connect((err) => {
 });
 
 
-app.get('/account', (req, res) => {
+app.post('/account', (req, res) => {
   const {username,password }= req.query;
-  const query = "SELECT * FROM `account` where username=? and password=?";
-
-  db.query(query, [username, password], (err, result) => {
+  console.log(req.query);
+    if (!username || !password) {
+      res.status(400).send({ error: 'Missing username or password' });
+      return;
+    }
+  const query= "SELECT * FROM `account` where username=? ";
+  db.query(query, [username], (err, result) => {
     if (err) {
       res.status(500).send({ error: 'Error fetching data' });
-    } else {
-      res.status(200).send(result);
+      return;
     }
+    if (result.length === 0) {
+      res.status(401).send({ error: 'Invalid credentials' });
+      return;
+    }
+    const hashedPassword = result[0].password;
+    bcrypt.compare(password, hashedPassword, (err, passwordMatch) => {
+      if (err) {
+        res.status(500).send({ error: 'Error logging in' });
+        return;
+      }
+
+      if (passwordMatch) {
+        res.status(200).send(result);
+      } else {
+        res.status(401).send({ error: 'Invalid password' });
+      }
+    });
   });
 });
 
-// Token(ID) verification middleware
+/// Generate a random secret key
+const SECRET_KEY ='00881166jamd';
+// Token verification middleware
 const verifyToken = (req, res, next) => {
   const token = req.headers.authorization;
-
+  
   if (!token) {
     return res.status(401).send({ error: 'No token provided' });
   }
-  const userId = parseInt(token); // Assuming token is the user_id
-  const query = 'SELECT * FROM account_information WHERE account_id = ?';
-  db.query(query, [userId], (err, results) => {
-    if (err) {
-      return res.status(500).send({ error: 'Error verifying token' });
-    }
 
-    if (results.length === 0) {
+  jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    if (err) {
       return res.status(401).send({ error: 'Invalid token' });
     }
     next();
   });
 };
+
+
+// Create account endpoint
+app.post('/create-account', (req, res) => {
+  const { Username, Password } = req.query;
+
+  if (!Username || !Password ) {
+    res.status(400).send({ error: 'Missing parameter or role ID error' });
+    return;
+  }
+
+  const token = jwt.sign({ Username }, SECRET_KEY); // Generate JWT token
+
+  bcrypt.hash(Password, 10, (err, hashedPassword) => {
+    if (err) {
+      console.error('Error hashing password:', err);
+      res.status(500).send({ error: 'Error creating account' });
+      return;
+    }
+
+    const query =
+      'INSERT INTO `account`( `username`, `password`, `token`) VALUES (?,?,?)';
+
+    db.query(query, [Username, hashedPassword, token], (err, result) => {
+      if (err) {
+        console.error('Error creating account:', err);
+        res.status(500).send({ error: 'Error creating account' });
+      } else {
+        res.status(200).send({ message: 'Account created successfully' });
+      }
+    });
+  });
+});
+
+// Create account endpoint
+app.put('/update-account',verifyToken, (req, res) => {
+  const { Name, Username, Password, Date_Updated, oldToken} = req.query;
+  console.log(req.query);
+  if (!Name || !Username || !Password || !Date_Updated ) {
+    res.status(400).send({ error: 'Missing parameter or role ID error' });
+    return;
+  }
+
+  const token = jwt.sign({ Username }, SECRET_KEY); // Generate JWT token
+
+  bcrypt.hash(Password, 10, (err, hashedPassword) => {
+    if (err) {
+      console.error('Error hashing password:', err);
+      res.status(500).send({ error: 'Error creating account' });
+      return;
+    }
+
+    const query =
+      'UPDATE accounts SET Name=?, Username= ?, Password=?, Date_Updated=?,token=? WHERE token=?';
+
+    db.query(query, [Name, Username, hashedPassword, Date_Updated,token, oldToken], (err, result) => {
+      if (err) {
+        console.error('Error creating account:', err);
+        res.status(500).send({ error: 'Error creating account' });
+      } else {
+        res.status(200).send({ message: 'Account updated successfully' });
+      }
+    });
+  });
+});
 
 app.get('/bhtables', verifyToken, (req, res) => {
   const displayData = req.query.displayData; 
@@ -69,6 +153,12 @@ app.get('/bhtables', verifyToken, (req, res) => {
   
   } else if (displayData === "ReservationForm") {
     sqlQuery = "SELECT * FROM `reservation`";
+ 
+  }else if (displayData === "ROOM_NUMBER") {
+    sqlQuery = "SELECT ROOM_NUMBER, ROOM_ID FROM room_information";
+ 
+  }else if (displayData === "name") {
+    sqlQuery = "SELECT concat(`STUDENT_FIRST_NAME`,' ', `STUDENT_MIDDLE_NAME`,' ', `STUDENT_LAST_NAME`) as name, STUDENT_ID FROM `student_information`";
  
   } else if (displayData === "MontlyPayment") {
     sqlQuery = "SELECT concat(`STUDENT_FIRST_NAME`,' ', `STUDENT_MIDDLE_NAME`,' ', `STUDENT_LAST_NAME`) as name,monthly_payment.PAYMENT,Date_Format(monthly_payment.DATE , '%d-%m-%Y') as 'Payment' FROM `student_information` INNER JOIN monthly_payment on monthly_payment.STUDENT_ID=student_information.STUDENT_ID";
@@ -87,17 +177,11 @@ app.get('/bhtables', verifyToken, (req, res) => {
 });
 
 app.get('/search', verifyToken, (req, res) => {
-  let {displayData,searchData}=req.query;
-  
+  let {searchData}=req.query;
   let sqlQuery;
-  if (displayData === "Student_Information") {
     searchData=searchData+"%";
     sqlQuery = "SELECT * FROM `student_information` where  STUDENT_FIRST_NAME like ?";
-  } 
   
-  else {
-    return res.status(400).send({ error: 'Invalid displayData value' });
-  }
   db.query(sqlQuery,[searchData], (err, result) => {
     if (err) {
       res.status(500).send({ error: 'Error fetching data' });
@@ -135,14 +219,10 @@ app.delete('/bhdeletion', verifyToken, (req, res) => {
 
 app.put('/boardinghouse', verifyToken, (req, res) => {
   const id=req.query.id;
-  const tableName=req.query.tableName;
-
-  if ( !id || isNaN(id) || !tableName) {
+  if ( !id || isNaN(id) ) {
     res.status(400).send({ error: "Missing parameter or id error" });
     return;
   }
-
-  if(tableName==="RoomInformation"){
     const {roomnumber,occupancy} = req.query;
     if (!roomnumber|| !occupancy ) {
       res.status(400).send({ error: "Missing parameter" });
@@ -156,13 +236,9 @@ app.put('/boardinghouse', verifyToken, (req, res) => {
         res.status(200).send({ message: 'Successfully updated' });
       }
     });
-  }
-  else{
-    return res.status(400).send({ error: 'Invalid table name' });
-  }
 });
 
-app.post('/boardinghouse', verifyToken, (req, res) => {
+app.post('/bhinsert', verifyToken, (req, res) => {
   const tableName=req.query.tableName;
   console.log(tableName);
   if(tableName==="Student_Information"){
@@ -188,7 +264,7 @@ app.post('/boardinghouse', verifyToken, (req, res) => {
       res.status(400).send({ error: "Missing parameter" });
       return;
     }
-    const query = "INSERT INTO `room_information`( `ROOM_NUMBER`, `OCCUPANCY'=?";
+    const query = "INSERT INTO `room_information`( `ROOM_NUMBER`, `OCCUPANCY`) VALUES (?,?)";
     db.query(query, [roomNumber,occupancy], (err, result) => {
       if (err) {
         res.status(500).send({ error: 'Error' });
@@ -197,131 +273,40 @@ app.post('/boardinghouse', verifyToken, (req, res) => {
       }
     });
   }
-});
-  /*else if(tableName==="Account Request"){
-    const {name,username,password,dateCreated,roleId} = req.query;
-    if (!name || !username || !password || !dateCreated || !roleId || isNaN(roleId)) {
-      res.status(400).send({ error: "Missing parameter or role id error" });
+  else if(tableName==="monthly_payment"){
+    const {STUDENT_ID,PAYMENT,DATE} = req.query;
+    console.log(req.query);
+    if (!STUDENT_ID || !PAYMENT) {
+      res.status(400).send({ error: "Missing parameter" });
       return;
     }
-    const query = "INSERT INTO `account_request`(`Name`, `Username`, `Password`, `Date_Created`, `Role_ID`) VALUES (?,?,?,?,?)";
-    db.query(query, [name,username,password,dateCreated,roleId], (err, result) => {
+    const query = "INSERT INTO `monthly_payment`( `STUDENT_ID`, `PAYMENT`, `DATE`) VALUES (?,?,?)";
+    db.query(query, [STUDENT_ID,PAYMENT,DATE], (err, result) => {
       if (err) {
-      res.status(500).send({ error: 'Error' });
-    } else {
-      res.status(200).send({ message: 'Successfully inserted' });
+        res.status(500).send({ error: 'Error' });
+      } else {
+        res.status(200).send({ message: 'Successfully inserted' });
+      }
+    });
+  }
+  else if(tableName==="reservation"){
+    const {STUDENT_NAME,RESERVATION_DATE,ADVANCE_PAYMENT} = req.query;
+    console.log(req.query);
+    if (!STUDENT_NAME || !ADVANCE_PAYMENT) {
+      res.status(400).send({ error: "Missing parameter" });
+      return;
     }
-  });
+    const query = "INSERT INTO `reservation`( `STUDENT_NAME`, `RESERVATION_DATE`, `ADVANCE_PAYMENT`) VALUES  (?,?,?)";
+    db.query(query, [STUDENT_NAME,RESERVATION_DATE,ADVANCE_PAYMENT], (err, result) => {
+      if (err) {
+        res.status(500).send({ error: 'Error' });
+      } else {
+        res.status(200).send({ message: 'Successfully inserted' });
+      }
+    });
   }
-  else if(tableName==="Beneficiaries"){
-    const {residentId,benefitId,membershipDate,status} = req.query;
-    if (!residentId || isNaN(residentId) || !benefitId || isNaN(benefitId) || !membershipDate || !status) {
-    res.status(400).send({ error: "Missing parameter or id error" });
-    return;
-    }
-   const query = "INSERT INTO `beneficiary`(`Resident_ID`, `Benefit_ID`, `Membership_Date`, `Status`) VALUES (?,?,?,?)";
-    db.query(query, [residentId,benefitId,membershipDate,status], (err, result) => {
-    if (err) {
-      res.status(500).send({ error: 'Error' });
-    } else {
-      res.status(200).send({ message: 'Successfully inserted' });
-    }
-  });
-  }
-  else if(tableName==="Benefits"){
-   const {benefitName,description,dateImplemented} = req.query;
-   if (!benefitName || !description || !dateImplemented) {
-    res.status(400).send({ error: "Missing parameter or id error" });
-    return;
-  }
-  const query = "INSERT INTO `benefits`(`Benefit_Name`,`Description`, `Date_Implemented`) VALUES (?,?,?)";
-  db.query(query, [benefitName,description,dateImplemented], (err, result) => {
-    if (err) {
-      res.status(500).send({ error: 'Error' });
-    } else {
-      res.status(200).send({ message: 'Successfully inserted' });
-    }
-  });
-  }
-  else if(tableName==="Blood Pressure"){
-  const {residentId} = req.query;
-  if (!residentId || isNaN(residentId)) {
-    res.status(400).send({ error: "Missing parameter or id error" });
-    return;
-  }
-  const query = "INSERT INTO `blood_pressure`(`Resident_ID`) VALUES (?)";
-  db.query(query, [residentId], (err, result) => {
-    if (err) {
-      res.status(500).send({ error: 'Error' });
-    } else {
-      res.status(200).send({ message: 'Successfully inserted' });
-    }
-  });
-  }
-  else if(tableName==="BMI"){
-  const {residentId} = req.query;
-  if (!residentId || isNaN(residentId)) {
-    res.status(400).send({ error: "Missing parameter or id error" });
-    return;
-  }
-  const query = "INSERT INTO `bmi_information`(`Resident_ID`) VALUES(?)";
-  db.query(query, [residentId], (err, result) => {
-    if (err) {
-      res.status(500).send({ error: 'Error' });
-    } else {
-      res.status(200).send({ message: 'Successfully inserted' });
-    }
-  });
-  }
-  else if(tableName==="Pregnancy"){
-  const {residentId,monthsOfPregnancy,dateChecked} = req.query;
-  if (!residentId || isNaN(residentId) || !monthsOfPregnancy || isNaN(monthsOfPregnancy) || !dateChecked) {
-    res.status(400).send({ error: "Missing parameter or id error" });
-    return;
-  }
-  const query = "INSERT INTO `pregnancy_information`(`Resident_ID`, `Months_of_Pregnancy`, `Date_Checked`) VALUES (?,?,?)";
-  db.query(query, [residentId,monthsOfPregnancy,dateChecked], (err, result) => {
-    if (err) {
-      res.status(500).send({ error: 'Error' });
-    } else {
-      res.status(200).send({ message: 'Successfully inserted' });
-    }
-  });
-  }
-  else if(tableName==="Vaccine"){
-  const {vaccineName,vaccineDetail,dossageSequence,dateImplemented} = req.query;
-  if (!vaccineName || isNaN(dossageSequence) || !vaccineDetail || !dateImplemented) {
-    res.status(400).send({ error: "Missing parameter or id error" });
-    return;
-  }
-  const query = "INSERT INTO `vaccine`( `Vaccine_Name`, `Vaccine_Detail`, `Dossage_Sequence`, `Date_Implemented`) VALUES (?,?,?,?)";
-  db.query(query, [vaccineName,vaccineDetail,dossageSequence,dateImplemented], (err, result) => {
-    if (err) {
-      res.status(500).send({ error: 'Error' });
-    } else {
-      res.status(200).send({ message: 'Successfully inserted' });
-    }
-  });
-  }
-  else if(tableName==="Vaccination"){
-  const {residentId,vaccinationDate,vaccineId,vaccinationCount,status} = req.query;
-  if (!residentId || isNaN(residentId) || !vaccinationDate || isNaN(vaccineId) || !vaccineId || !vaccinationCount || isNaN(vaccinationCount) || !status) {
-    res.status(400).send({ error: "Missing parameter or id error" });
-    return;
-  }
-  const query = "INSERT INTO `vaccination`( `Resident_ID`, `Vaccination_Date`, `Vaccine_ID`, `Vaccination_Count`, `Status`) VALUES (?,?,?,?,?)";
-  db.query(query, [residentId,vaccinationDate,vaccineId,vaccinationCount,status], (err, result) => {
-    if (err) {
-      res.status(500).send({ error: 'Error' });
-    } else {
-      res.status(200).send({ message: 'Successfully inserted' });
-    }
-  });
-  }
-  else{
-  return res.status(400).send({ error: 'Invalid table name' });
-  }
-});*/
+});
+  
 
 app.listen(3000, () => {
   console.log('Server running on port 3000');

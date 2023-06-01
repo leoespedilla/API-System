@@ -69,11 +69,12 @@
             // 
             // btnBack
             // 
+            btnBack.BackgroundImage = Properties.Resources._340;
+            btnBack.BackgroundImageLayout = ImageLayout.Stretch;
             btnBack.Location = new Point(788, 657);
             btnBack.Name = "btnBack";
             btnBack.Size = new Size(55, 30);
             btnBack.TabIndex = 8;
-            btnBack.Text = "BACK";
             btnBack.UseVisualStyleBackColor = true;
             btnBack.Click += btnBack_Click;
             // 

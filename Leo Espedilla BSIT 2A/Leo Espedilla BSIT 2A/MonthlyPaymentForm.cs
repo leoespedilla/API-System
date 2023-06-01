@@ -21,15 +21,15 @@ namespace Leo_Espedilla_BSIT_2A
 
         private void MonthlyPaymentForm_Load(object sender, EventArgs e)
         {
-            InfoDB.cbxViewStudent(cbxStudent);
-            InfoDB.dgvViewing(" SELECT concat(`STUDENT_FIRST_NAME`,' ', `STUDENT_MIDDLE_NAME`,' ', `STUDENT_LAST_NAME`) as name,monthly_payment.PAYMENT,Date_Format(monthly_payment.DATE , '%d-%m-%Y') as 'Payment' FROM `student_information` INNER JOIN monthly_payment on monthly_payment.STUDENT_ID=student_information.STUDENT_ID", dgvPayment);
+           ConnectAPI.cbxViewStudent(cbxStudent);
+           ConnectAPI.dgvViewing("MontlyPayment", dgvPayment);
 
         }
 
         private void btnBack_Click(object sender, EventArgs e)
         {
-            MainForm mainForm = new MainForm();
-            mainForm.Show();
+            StudentInfoForm studentInfoForm = new StudentInfoForm();
+            studentInfoForm.Show();
             this.Hide();
         }
 
@@ -40,7 +40,9 @@ namespace Leo_Espedilla_BSIT_2A
 
         private void btnAddPayment_Click(object sender, EventArgs e)
         {
-            InfoDB.SaveUpdateDeleteData("INSERT INTO `monthly_payment`( `STUDENT_ID`, `PAYMENT`, `DATE`) VALUES ('" + cbxStudent.SelectedValue + "','" + tbxPayment.Text + "','" + dtpMonthlyPayment.Value.ToString("yyyy-dd-MM") + "')");
+            string [] column = { "STUDENT_ID","PAYMENT","DATE" };
+            string[] data = { Convert.ToString(cbxStudent.SelectedValue) , tbxPayment.Text , dtpMonthlyPayment.Value.ToString("yyyy-dd-MM") };
+            ConnectAPI.saveData("monthly_payment",column,data);
 
         }
     }

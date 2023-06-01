@@ -25,7 +25,7 @@ namespace Leo_Espedilla_BSIT_2A
 
         private void btnSignIn_Click(object sender, EventArgs e)
         {
-            Boolean verifyAccount = InfoDB.AccountVerification(tbxUserName.Text, tbxPassword.Text);
+            Boolean verifyAccount = ConnectAPI.AccountVerifier(tbxUserName, tbxPassword);
             if (verifyAccount)
             {
                 Instantiate.display.MainForm(this);
@@ -34,7 +34,7 @@ namespace Leo_Espedilla_BSIT_2A
             {
 
 
-               
+
             }
 
 
@@ -48,7 +48,7 @@ namespace Leo_Espedilla_BSIT_2A
 
         private void tbxUserName_TextChanged(object sender, EventArgs e)
         {
-            
+
 
         }
 
@@ -59,7 +59,7 @@ namespace Leo_Espedilla_BSIT_2A
 
         private void tbxPassword_TextChanged(object sender, EventArgs e)
         {
-         
+
             tbxPassword.PasswordChar = '*';
         }
 

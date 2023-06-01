@@ -8,8 +8,8 @@ namespace Leo_Espedilla_BSIT_2A
 {
     internal class InfoUser
     {
-        public string Name { get; set; }
-        public string Role { get; set; }
+        public string token { get; set; }
+       
 
     }
 }

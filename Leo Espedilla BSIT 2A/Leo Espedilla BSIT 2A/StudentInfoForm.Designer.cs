@@ -92,6 +92,7 @@
             label1.Size = new Size(695, 65);
             label1.TabIndex = 1;
             label1.Text = "STUDENT's      INFORMATION";
+            label1.Click += label1_Click;
             // 
             // label13
             // 
